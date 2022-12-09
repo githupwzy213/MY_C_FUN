@@ -1,15 +1,51 @@
 #include"contact.h"
 void InitContact(struct contact*ps)
 {
-	memset(ps->data, '#', sizeof(ps->data));//内存设置，将通讯录成员信息全部初始化为0
+	 ps->data = (struct Member*)malloc(SIZE * sizeof(struct Member));
+	 //动态开辟空间存放联系人信息，初始化开辟SIZE个联系人空间后续不足再扩充
+	if (ps->data == NULL)
+	{
+		printf("%s\n", strerror(errno));
+		return ;
+	}
+	memset(ps->data, '#', SIZE*sizeof(struct Member));//内存设置，将通讯录成员信息全部初始化为0
 	ps->size = 0;//通讯录大小初始化为0
+	ps->capicty = SIZE;//通讯录容量初始化为3
+}
+
+//退出通讯录，释放通讯录所占的内存空间
+void DestroyContact(struct contact* ps)
+{
+	free(ps->data);
+	ps->data = NULL;
+	//ps不是动态开辟的不用free
+}
+//判断通讯录大小是否达到容量上限，当容量达到上限扩容
+void CheckCapicty(struct contact* ps)
+{
+
+	if (ps->size == ps->capicty)//当通讯录达到容量
+	{
+		struct Member* temp = (struct Member*)realloc(ps->data, sizeof(struct Member)*(ps->capicty+2));
+		//一次扩充两个容量
+		if (temp == NULL)
+		{
+			printf("%s\n", strerror(errno));
+			printf("扩容失败\n");
+			return;
+		}
+		ps->data = temp;
+		ps->capicty += 2;
+		//free(temp);//此时还不能free因为temp和ps->data指的是同一块空间，如果free(temp)相当于把通讯录内存空间给释放了，后续就不能用力
+		temp = NULL;
+		printf("扩容成功\n");
+	}
 }
 //添加联系人
 void Add(struct contact* ps)
 {
-	if (ps->size == MAX)
-		printf("通讯录已满，添加失败\n");
-	else
+	CheckCapicty(ps);//检查通讯录容量是否不足，是否需要扩充
+	if (ps->size < ps->capicty)
 	{
 		printf("请输入姓名：\n");
 		scanf("%s", ps->data[ps->size].name);
@@ -22,6 +58,7 @@ void Add(struct contact* ps)
 		printf("添加成功\n");
 		ps->size++;
 	}
+	
 }
 //打印通讯录信息
 void ShowContact(struct contact* ps)

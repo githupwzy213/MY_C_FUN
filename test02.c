@@ -6,7 +6,7 @@ void menu()
 }
 int main()
 {
-	struct contact con;
+	struct contact con={0};
 	//初始化通讯录
 	InitContact(&con);
 	int input = 0;
@@ -18,9 +18,13 @@ int main()
 		switch (input)//在终端输入时必须输入整数0-6，不可以直接输入EXIT等
 		{
 		case  EXIT:
+		{
+			DestroyContact(&con);
 			break;
+		}
 		case ADD:
 		{
+
 			Add(&con);
 			break;
 		}
@@ -44,6 +48,7 @@ int main()
 		case SHOW:
 		{
 			ShowContact(&con);
+			break;
 		}
 		case SORT:
 		{
